@@ -7,7 +7,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     package_data={
-        "grooming_prep": ["templates/*.html"],
+        "grooming_prep.output": ["templates/*.html"],
     },
     install_requires=[
         "click>=8.1.0",

@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import load_config
-from .jira_client import JiraClient
-from .ai_summarizer import summarize_tickets
-from .analyzer import analyze_tickets, sort_tickets, build_discussion_order
+from .jira.client import JiraClient
+from .ai.summarizer import summarize_tickets
+from .analysis.analyzer import analyze_tickets, sort_tickets, build_discussion_order
 from .models import ReportRequest, ReportResponse, ReportSummary
 
 app = FastAPI(title="Grooming Prep API")

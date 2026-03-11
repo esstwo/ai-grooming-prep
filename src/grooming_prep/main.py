@@ -2,10 +2,10 @@ import webbrowser
 import click
 
 from .config import load_config
-from .jira_client import JiraClient
-from .ai_summarizer import summarize_tickets
-from .analyzer import analyze_tickets, sort_tickets, build_discussion_order
-from .report import generate_report
+from .jira.client import JiraClient
+from .ai.summarizer import summarize_tickets
+from .analysis.analyzer import analyze_tickets, sort_tickets, build_discussion_order
+from .output.report import generate_report
 
 
 @click.command()

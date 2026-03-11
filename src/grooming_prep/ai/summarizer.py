@@ -1,4 +1,5 @@
 import asyncio
+import re
 from groq import AsyncGroq
 
 PROMPT_TEMPLATE = """You are a technical analyst helping an engineering manager prepare for a grooming session.
@@ -38,7 +39,10 @@ async def summarize_ticket_async(client: AsyncGroq, ticket: dict, model: str) ->
             max_tokens=400,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        # Strip <think>...</think> blocks from reasoning models (e.g. qwen3)
+        content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL)
+        return content.strip()
     except Exception as e:
         return f"Summary generation failed: {e}"
 

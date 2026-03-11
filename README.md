@@ -84,15 +84,21 @@ streamlit run streamlit_app.py
 
 ```
 src/grooming_prep/
-├── config.py          # Environment/config loading
-├── jira_client.py     # JIRA API client
-├── ai_summarizer.py   # Groq-powered ticket summarizer
-├── analyzer.py        # Risk detection and ticket ordering
-├── models.py          # Pydantic API models
-├── api.py             # FastAPI app
-├── report.py          # HTML report generator
-└── main.py            # CLI entrypoint
-streamlit_app.py       # Streamlit browser UI
+├── config.py              # Environment/config loading
+├── models.py              # Pydantic API models
+├── api.py                 # FastAPI app
+├── main.py                # CLI entrypoint
+├── jira/
+│   └── client.py          # JIRA API client
+├── ai/
+│   └── summarizer.py      # Groq-powered ticket summarizer
+├── analysis/
+│   └── analyzer.py        # Risk detection and ticket ordering
+└── output/
+    ├── report.py           # HTML report generator
+    └── templates/
+        └── report.html
+streamlit_app.py           # Streamlit browser UI
 ```
 
 ## Requirements
