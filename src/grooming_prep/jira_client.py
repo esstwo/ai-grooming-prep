@@ -89,7 +89,7 @@ class JiraClient:
 
         while True:
             data = self._get(
-                "search",
+                "search/jql",
                 params={
                     "jql": jql,
                     "startAt": start,
