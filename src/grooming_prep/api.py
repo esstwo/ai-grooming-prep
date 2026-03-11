@@ -44,7 +44,7 @@ async def generate_report(req: ReportRequest):
         )
 
     if not req.skip_ai:
-        tickets = summarize_tickets(tickets, config["anthropic_api_key"])
+        tickets = summarize_tickets(tickets, config["groq_api_key"], config["groq_model"])
 
     tickets = analyze_tickets(tickets)
     tickets = sort_tickets(tickets)

@@ -5,7 +5,7 @@ Automatically generate grooming prep reports from JIRA tickets using AI. Surface
 ## Features
 
 - Fetches backlog tickets from JIRA with full metadata
-- AI-powered summaries via Claude (purpose, technical scope, open questions)
+- AI-powered summaries via Groq (purpose, technical scope, open questions)
 - Risk detection: missing AC, unclear descriptions, stale tickets, blockers
 - Suggested discussion order prioritised by severity
 - Three interfaces: CLI, FastAPI backend, Streamlit browser UI
@@ -34,7 +34,8 @@ JIRA_URL=https://yourcompany.atlassian.net
 JIRA_EMAIL=you@company.com
 JIRA_API_TOKEN=your_jira_api_token
 JIRA_PROJECT=PROJ                     # optional default project
-ANTHROPIC_API_KEY=your_anthropic_key
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.3-70b-versatile    # optional, this is the default
 ```
 
 ## Usage
@@ -85,7 +86,7 @@ streamlit run streamlit_app.py
 src/grooming_prep/
 ├── config.py          # Environment/config loading
 ├── jira_client.py     # JIRA API client
-├── ai_summarizer.py   # Claude-powered ticket summarizer
+├── ai_summarizer.py   # Groq-powered ticket summarizer
 ├── analyzer.py        # Risk detection and ticket ordering
 ├── models.py          # Pydantic API models
 ├── api.py             # FastAPI app
@@ -98,4 +99,4 @@ streamlit_app.py       # Streamlit browser UI
 
 - Python 3.11+
 - JIRA Cloud account with API token
-- Anthropic API key
+- Groq API key (get one at https://console.groq.com)

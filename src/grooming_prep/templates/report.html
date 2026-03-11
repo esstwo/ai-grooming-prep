@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grooming Report - {{ project }} - {{ run_date }}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.5; }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Header */
+  .header { background: #1a1a2e; color: white; padding: 24px 32px; border-radius: 12px; margin-bottom: 24px; }
+  .header h1 { font-size: 1.6rem; font-weight: 700; }
+  .header .meta { margin-top: 8px; opacity: 0.75; font-size: 0.9rem; }
+
+  /* Summary cards */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .summary-card { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .summary-card .number { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+  .summary-card .label { font-size: 0.8rem; color: #666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-card.danger .number { color: #e53935; }
+  .summary-card.warning .number { color: #f57c00; }
+
+  /* Section headers */
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e8ecf0; color: #1a1a2e; }
+  .section { margin-bottom: 32px; }
+
+  /* Risk section */
+  .risk-group { margin-bottom: 16px; }
+  .risk-group-title { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 8px; }
+  .risk-item { background: #fff8f0; border-left: 4px solid #f57c00; border-radius: 0 8px 8px 0; padding: 10px 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .risk-item.high { background: #fff5f5; border-color: #e53935; }
+  .risk-item a { color: #1565c0; font-weight: 600; text-decoration: none; font-size: 0.9rem; }
+  .risk-item a:hover { text-decoration: underline; }
+  .risk-item .risk-summary { color: #555; font-size: 0.85rem; flex: 1; }
+
+  /* Ticket cards */
+  .ticket-card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 14px; overflow: hidden; }
+  .ticket-header { padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; border-bottom: 1px solid #f0f2f5; }
+  .ticket-key a { color: #1565c0; font-weight: 700; text-decoration: none; font-size: 0.95rem; white-space: nowrap; }
+  .ticket-key a:hover { text-decoration: underline; }
+  .ticket-summary { flex: 1; font-weight: 600; font-size: 0.95rem; }
+  .ticket-body { padding: 14px 18px; }
+  .ticket-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+  .badge-priority-highest { background: #ffebee; color: #c62828; }
+  .badge-priority-high { background: #fff3e0; color: #e65100; }
+  .badge-priority-medium { background: #e8f5e9; color: #2e7d32; }
+  .badge-priority-low { background: #e3f2fd; color: #1565c0; }
+  .badge-priority-lowest { background: #f3e5f5; color: #6a1b9a; }
+  .badge-risk-high { background: #ffebee; color: #c62828; }
+  .badge-risk-medium { background: #fff8e1; color: #f57f17; }
+  .badge-dep { background: #e8eaf6; color: #283593; }
+  .badge-type { background: #f5f5f5; color: #555; }
+
+  /* AI Summary */
+  .ai-summary { background: #f8f9ff; border-radius: 8px; padding: 12px 14px; font-size: 0.875rem; line-height: 1.6; white-space: pre-wrap; }
+  .ai-summary-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #5c6bc0; margin-bottom: 6px; }
+
+  /* Dependencies */
+  .deps { margin-top: 10px; }
+  .deps-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .dep-item { font-size: 0.82rem; color: #444; padding: 2px 0; }
+  .dep-item a { color: #1565c0; text-decoration: none; }
+  .dep-item a:hover { text-decoration: underline; }
+
+  /* Discussion order */
+  .discussion-list { list-style: none; counter-reset: disc-counter; }
+  .discussion-list li { counter-increment: disc-counter; display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .discussion-list li::before { content: counter(disc-counter); background: #1a1a2e; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .discussion-list li a { color: #1565c0; font-weight: 600; text-decoration: none; }
+  .discussion-list li a:hover { text-decoration: underline; }
+  .discussion-list li .disc-summary { color: #555; font-size: 0.85rem; flex: 1; }
+  .discussion-list li .disc-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  footer { text-align: center; color: #aaa; font-size: 0.8rem; margin-top: 32px; padding-bottom: 24px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Grooming Prep Report — {{ project }}</h1>
+    <div class="meta">Generated {{ run_date }} &nbsp;|&nbsp; Status: {{ status }} &nbsp;|&nbsp; {{ total_tickets }} tickets</div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="number">{{ total_tickets }}</div>
+      <div class="label">Total Tickets</div>
+    </div>
+    <div class="summary-card danger">
+      <div class="number">{{ high_priority_count }}</div>
+      <div class="label">High+ Priority</div>
+    </div>
+    <div class="summary-card danger">
+      <div class="number">{{ flagged_count }}</div>
+      <div class="label">Flagged Risks</div>
+    </div>
+    <div class="summary-card warning">
+      <div class="number">{{ stale_count }}</div>
+      <div class="label">Stale Tickets</div>
+    </div>
+    <div class="summary-card warning">
+      <div class="number">{{ blocked_count }}</div>
+      <div class="label">Blocked</div>
+    </div>
+  </div>
+
+  <!-- Flagged Risks -->
+  {% if flagged_tickets %}
+  <div class="section">
+    <div class="section-title">Flagged Risks</div>
+    {% for ticket in flagged_tickets %}
+    <div class="risk-item {% if ticket.risks | selectattr('severity', 'eq', 'high') | list %}high{% endif %}">
+      <span class="ticket-key"><a href="{{ ticket.url }}" target="_blank">{{ ticket.key }}</a></span>
+      <span class="risk-summary">{{ ticket.summary }}</span>
+      <span style="display:flex;gap:4px;flex-wrap:wrap">
+        {% for risk in ticket.risks %}
+        <span class="badge badge-risk-{{ risk.severity }}">{{ risk.label }}</span>
+        {% endfor %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Ticket Breakdown -->
+  <div class="section">
+    <div class="section-title">Ticket Breakdown (Priority Order)</div>
+    {% for ticket in tickets %}
+    <div class="ticket-card">
+      <div class="ticket-header">
+        <span class="ticket-key"><a href="{{ ticket.url }}" target="_blank">{{ ticket.key }}</a></span>
+        <span class="ticket-summary">{{ ticket.summary }}</span>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-meta">
+          <span class="badge badge-priority-{{ ticket.priority | lower | replace(' ', '-') }}">{{ ticket.priority }}</span>
+          <span class="badge badge-type">{{ ticket.issue_type }}</span>
+          {% if ticket.assignee and ticket.assignee != 'Unassigned' %}
+          <span class="badge badge-type">{{ ticket.assignee }}</span>
+          {% endif %}
+          {% for risk in ticket.risks %}
+          <span class="badge badge-risk-{{ risk.severity }}">{{ risk.label }}</span>
+          {% endfor %}
+          {% for link in ticket.links %}
+          <span class="badge badge-dep">{{ link.type }}: {{ link.key }}</span>
+          {% endfor %}
+        </div>
+
+        {% if ticket.ai_summary %}
+        <div class="ai-summary-label">AI Analysis</div>
+        <div class="ai-summary">{{ ticket.ai_summary }}</div>
+        {% endif %}
+
+        {% if ticket.links %}
+        <div class="deps">
+          <div class="deps-label">Dependencies</div>
+          {% for link in ticket.links %}
+          <div class="dep-item">
+            <strong>{{ link.type }}:</strong>
+            <a href="{{ ticket.url | replace(ticket.key, link.key) }}" target="_blank">{{ link.key }}</a>
+            {% if link.summary %} — {{ link.summary }}{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Suggested Discussion Order -->
+  <div class="section">
+    <div class="section-title">Suggested Discussion Order</div>
+    <ol class="discussion-list">
+      {% for ticket in discussion_order %}
+      <li>
+        <a href="{{ ticket.url }}" target="_blank">{{ ticket.key }}</a>
+        <span class="disc-summary">{{ ticket.summary }}</span>
+        <span class="disc-badges">
+          <span class="badge badge-priority-{{ ticket.priority | lower | replace(' ', '-') }}">{{ ticket.priority }}</span>
+          {% for risk in ticket.risks %}
+          <span class="badge badge-risk-{{ risk.severity }}">{{ risk.label }}</span>
+          {% endfor %}
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <footer>Generated by grooming-prep &nbsp;|&nbsp; {{ run_date }}</footer>
+</div>
+</body>
+</html>
